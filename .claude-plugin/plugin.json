@@ -7,5 +7,6 @@
   },
   "homepage": "https://github.com/bradselph/zero-trust-audit-team",
   "repository": "https://github.com/bradselph/zero-trust-audit-team",
-  "license": "MIT"
+  "license": "MIT",
+  "privacy": "https://github.com/bradselph/zero-trust-audit-team/blob/main/PRIVACY.md"
 }
