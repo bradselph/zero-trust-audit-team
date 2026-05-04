@@ -11,7 +11,7 @@ Convert findings into an ordered fix plan. Dispatch `@audit-orchestrator`.
 
 1. **Preflight.** Confirm:
    - `.claude/audit-state/findings/` contains at least one `FND-*.json` file
-   - Every manifest file has status `"COMPLETE"` in `coverage.json`
+   - Every manifest file has status `"complete"` in `coverage.json`
    
    If files remain unaudited, warn the user:
    
@@ -64,5 +64,5 @@ Convert findings into an ordered fix plan. Dispatch `@audit-orchestrator`.
 ## Edge cases
 
 - **Zero findings**: the audit produced nothing to triage. Report that with coverage stats, congratulate the user, and suggest `/audit:summary`.
-- **All findings are INFO observations**: still produce a plan, but flag that auto-fix is inappropriate for observations — they should be human-reviewed and optionally batched into a cleanup pass.
-- **All findings are UNVERIFIED or LOW confidence**: the plan will be empty with everything deferred. Report what's needed to un-defer each.
+- **All findings are `info` observations**: still produce a plan, but flag that auto-fix is inappropriate for observations — they should be human-reviewed and optionally batched into a cleanup pass.
+- **All findings are `unverified` or `low` confidence**: the plan will be empty with everything deferred. Report what's needed to un-defer each.

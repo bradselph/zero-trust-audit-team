@@ -2,6 +2,8 @@
 
 All agents read from and write to this directory. Every file is plain JSON or Markdown — diffable, reviewable, and persistent across `/clear`.
 
+> **Schema policy.** The templates below are the *only* legal shapes. Field names, casing, and enums are normative. Agents must copy these templates verbatim and fill in values — they must not invent fields, rename fields, or change casing. Two real-world deployments produced 12 schema-drift bugs between them; this document is the response.
+
 ---
 
 ## `scope.json`
@@ -50,7 +52,7 @@ All agents read from and write to this directory. Every file is plain JSON or Ma
   "coverage_pct": 27.4,
   "files": {
     "src/main.ts": {
-      "status": "COMPLETE",
+      "status": "complete",
       "declared_lines": 142,
       "inspected_lines": 142,
       "functions_analyzed": 8,
@@ -58,7 +60,7 @@ All agents read from and write to this directory. Every file is plain JSON or Ma
       "finding_ids": ["FND-0001", "FND-0002"]
     },
     "src/auth.ts": {
-      "status": "PARTIAL",
+      "status": "partial",
       "declared_lines": 430,
       "inspected_lines": 210,
       "functions_analyzed": 5,
@@ -78,29 +80,31 @@ All agents read from and write to this directory. Every file is plain JSON or Ma
 }
 ```
 
-**Valid `status` values**: `not-started` · `PARTIAL` · `COMPLETE` · `audit-failed`
+**Valid `status` values** (lowercase): `not-started` · `partial` · `complete` · `audit-failed`
+
+**Top-level shape is an object, not an array.** Per-file entries are keyed by path under `files`. Do not flatten to `[ {path, status}, ... ]`.
 
 ---
 
 ## `findings/FND-NNNN.json`
 
-All fields are required. IDs are zero-padded four-digit integers (`FND-0001`), assigned sequentially.
+All fields are required (use `null` for absent values, not omission). IDs are zero-padded four-digit integers (`FND-0001`), assigned sequentially.
 
 ```json
 {
   "id": "FND-0001",
   "file": "src/auth.ts",
-  "line_start": 87,
-  "line_end": 94,
+  "line": 87,
+  "end_line": 94,
   "anchor": "if (token == null) return",
-  "kind": "bug",
   "type": "silent-failure",
-  "severity": "HIGH",
-  "confidence": "HIGH",
+  "severity": "high",
+  "confidence": "high",
+  "title": "validateToken returns undefined on expired tokens",
+  "description": "validateToken silently returns undefined on expired tokens instead of returning false or throwing. Callers that check truthiness are fooled into treating the failure as success.",
+  "impact": "Authentication bypass on any route that calls validateToken() and checks return value with truthy/falsy test rather than strict equality.",
   "snippet": "<verbatim code, ≥5 lines of context>",
   "trace": "validateToken() called with expired token → line 87 branch taken → function returns undefined instead of false → caller at routes.ts:42 checks truthiness, treats undefined as falsy, proceeds with unauthenticated request",
-  "explanation": "validateToken silently returns undefined on expired tokens instead of returning false or throwing. Callers that check truthiness are fooled into treating the failure as success.",
-  "impact": "Authentication bypass on any route that calls validateToken() and checks return value with truthy/falsy test rather than strict equality.",
   "status": "open",
   "linked_fix_id": null,
   "related_findings": [],
@@ -109,16 +113,29 @@ All fields are required. IDs are zero-padded four-digit integers (`FND-0001`), a
 }
 ```
 
-**Valid `kind` values**: `bug` · `observation`
+**Field notes:**
+- `line` is the start line (single-line findings: `end_line` equals `line`). Do not use `line_start`/`line_end` — those names were the v1.0 spec but no real run ever used them.
+- `title` is a one-sentence, human-scannable summary. `description` is the full explanation. `impact` is the concrete consequence. Three distinct fields, each with one job.
+- The v1.0 `kind` field (`bug` / `observation`) is removed. `severity: "info"` encodes observations; everything else is a bug.
 
-**Valid `type` values**: `silent-failure` · `resource-leak` · `concurrency-hazard` · `input-validation` · `insecure-pattern` · `unreachable-code` · `cross-file-mismatch` · `doc-drift` · `redundancy` · `dead-code` · `spec-violation`
+**Valid `type` values** (preferred — kebab-case, prefer reusing values seen in prior findings):
+- Behavior bugs: `silent-failure` · `logic-error` · `unreachable-code` · `dead-code` · `redundancy`
+- Resources & concurrency: `resource-leak` · `concurrency-hazard` · `race-condition` · `toctou`
+- Security primitives: `input-validation` · `insecure-pattern` · `injection` · `buffer-overflow` · `null-deref` · `crypto` · `path-traversal` · `directory-hijack`
+- Cross-cutting: `cross-file-mismatch` · `doc-drift` · `spec-violation` · `incomplete-feature`
 
-**Valid `severity` values**: `CRITICAL` · `HIGH` · `MEDIUM` · `LOW` · `INFO`
+If none of the above fit, you may introduce a new kebab-case type — but check `findings/` first for an existing match. The triage-analyst clusters by `type`, so synonym proliferation hurts.
 
-**Valid `confidence` values**: `HIGH` · `MEDIUM` · `LOW`
+**Valid `severity` values** (lowercase): `critical` · `high` · `medium` · `low` · `info`
 
-**Valid `status` values**: `open` → `triaged` → `in-progress` → `fixed` → `verified`  
-Terminal statuses: `verified` · `wontfix` · `needs-human` · `UNVERIFIED`
+**Valid `confidence` values** (lowercase): `high` · `medium` · `low`
+
+**Valid `status` values** (lifecycle): `open` → `triaged` → `in-progress` → `fixed` → `verified`
+**Terminal:** `verified` · `wontfix` · `needs-human` · `deferred` · `unverified`
+
+- `deferred`: triage decided this finding cannot be acted on now (low confidence, blocked on external info). Distinct from `unverified`, which means the auditor itself could not finish verifying.
+- `wontfix`: only humans set this, except for one case — `fix-implementer` may set `wontfix` if the file no longer exists (`wontfix_reason: "file deleted since audit"`).
+- `needs-human`: the agents disagree, the fix is risky, or the finding is in a `sensitive_paths` location.
 
 **`detected_by` values**: `code-auditor` · `fix-implementer` · `re-verifier`
 
@@ -161,7 +178,7 @@ Terminal statuses: `verified` · `wontfix` · `needs-human` · `UNVERIFIED`
   "deferred": [
     {
       "finding_ids": ["FND-0005"],
-      "reason": "LOW confidence — external dependency behavior not verifiable from source",
+      "reason": "low confidence — external dependency behavior not verifiable from source",
       "needed_to_verify": "Access to redis-client source or integration test that exercises the timeout path"
     }
   ],
@@ -208,12 +225,30 @@ Written by the orchestrator on `/audit:summary`. Only exists when the audit is c
 ## State transitions (summary)
 
 ```
-File:     not-started → PARTIAL → COMPLETE
+File:     not-started → partial → complete
                                 └→ audit-failed
 
 Finding:  open → triaged → in-progress → fixed → verified
                                       └→ needs-human
                          └→ needs-human
-               └→ UNVERIFIED (deferred)
-                           └→ wontfix (file deleted only, or human decision)
+                         └→ deferred       (triage cannot act now)
+               └→ unverified                (auditor could not finish)
+                                            wontfix (humans, or file-deleted)
 ```
+
+---
+
+## Migration from v1.0 schema
+
+If you are resuming an audit that was started before v1.1, the state files may have these legacy shapes. The orchestrator should normalize on first read:
+
+| v1.0 | v1.1 |
+|---|---|
+| `line_start`, `line_end` | `line`, `end_line` |
+| `kind: "bug"` / `kind: "observation"` | drop field; severity already encodes it |
+| `explanation` | merge into `description` |
+| `severity: "HIGH"` | `severity: "high"` |
+| `confidence: "HIGH"` | `confidence: "high"` |
+| coverage `status: "COMPLETE"` | `status: "complete"` |
+| coverage `status: "PARTIAL"` | `status: "partial"` |
+| finding `status: "UNVERIFIED"` | `status: "unverified"` |

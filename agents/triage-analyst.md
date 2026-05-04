@@ -26,8 +26,8 @@ A single file: `.claude/audit-state/triage.json`. Schema in `.claude/audit-state
 
 Read every finding. For each:
 
-- Verify required fields are present (id, file, line_start, anchor, severity, confidence, snippet, trace, explanation, impact, status).
-- If a finding is missing fields, flag it in your output as `malformed` and do not include it in the plan.
+- Verify required fields are present: `id`, `file`, `line`, `end_line`, `anchor`, `type`, `severity`, `confidence`, `title`, `description`, `impact`, `snippet`, `trace`, `status`, `linked_fix_id`, `related_findings`, `detected_by`, `fix_implementer_dissent`. (Pre-v1.1 findings using `line_start`/`line_end`/`explanation`/`kind` are tolerated; flag them in output but include in the plan if all semantic content is present.)
+- If a finding is missing semantically required fields, flag it as `malformed` and do not include it in the plan.
 
 ### 2. Deduplicate
 
@@ -51,8 +51,8 @@ Score each fix-unit on four axes:
 
 | Axis | Weight | Scoring |
 |---|---|---|
-| Severity | 4 | CRITICAL=4, HIGH=3, MEDIUM=2, LOW=1, INFO=0 |
-| Confidence | 2 | HIGH=3, MEDIUM=2, LOW=1 |
+| Severity | 4 | critical=4, high=3, medium=2, low=1, info=0 |
+| Confidence | 2 | high=3, medium=2, low=1 |
 | Blast radius | 2 | Number of call sites or files affected (capped at 5) |
 | Fix simplicity | 1 | Inverse: trivial=3, localized=2, non-trivial=1 |
 
@@ -62,8 +62,8 @@ Higher score = earlier in the plan. Ties broken by severity, then by file path (
 
 A fix-unit is auto-fix eligible only if **all** of:
 
-- Max severity ≤ HIGH (no CRITICAL without human review)
-- Min confidence ≥ MEDIUM
+- Max severity ≤ `high` (no `critical` without human review)
+- Min confidence ≥ `medium`
 - `fix_unit` is `single-file` or `pattern-cluster`
 - No finding in the unit has `type: "cross-file-mismatch"` or `type: "doc-drift"`
 - No finding touches a file path matching `**/auth/**`, `**/crypto/**`, `**/payment*`, `**/*.sql`, `**/migrations/**`, or any path in `scope.json.sensitive_paths` if defined
@@ -72,7 +72,11 @@ Otherwise set `requires_human_review: true`.
 
 ### 6. Defer the unfixable
 
-Findings with `status: "UNVERIFIED"` or `confidence: "LOW"` go into `deferred`, not `plan`. State precisely what's needed to un-defer each.
+Findings with `status: "unverified"` or `confidence: "low"` go into `deferred` (in the triage plan) and have their finding `status` set to `deferred`. State precisely what's needed to un-defer each.
+
+Distinction:
+- `unverified` — auditor could not finish verifying. Set by `code-auditor`.
+- `deferred` — triage decided this is unactionable now (low confidence or external blocker). Set by you.
 
 Findings you suspect are false positives: **do not** mark `wontfix` yourself. Set `status: "needs-human"` and write a short dissent in `rationale`. The orchestrator surfaces these to the human.
 
@@ -124,12 +128,12 @@ Keep it tight:
 Triaged: <n> findings across <m> fix-units
   Auto-fix eligible: <a>
   Human review required: <b>
-  Deferred (UNVERIFIED / LOW confidence): <c>
+  Deferred (unverified / low confidence): <c>
   Malformed: <d>
 
 Top 5 by score:
-  #1  [HIGH×HIGH, score 25] pattern-cluster: FND-0007, FND-0012, FND-0019 — swallowed exceptions in HTTP handlers
-  #2  [HIGH×HIGH, score 22] single-file: FND-0001 — silent-failure in auth.validate()
+  #1  [high×high, score 25] pattern-cluster: FND-0007, FND-0012, FND-0019 — swallowed exceptions in HTTP handlers
+  #2  [high×high, score 22] single-file: FND-0001 — silent-failure in auth.validate()
   ...
 
 Wrote: .claude/audit-state/triage.json

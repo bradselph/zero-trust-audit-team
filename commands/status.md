@@ -23,13 +23,13 @@ Read-only snapshot. Dispatch `@audit-orchestrator` but instruct it to dispatch *
    - `files_reviewed / files_total`
    - `lines_reviewed / lines_total`
    - `coverage_pct`
-   - Count of files in each status: `not-started`, `PARTIAL`, `COMPLETE`, `audit-failed`
-   - List any files with `status: "PARTIAL"` and their resume lines
+   - Count of files in each status: `not-started`, `partial`, `complete`, `audit-failed`
+   - List any files with `status: "partial"` and their resume lines
 
 3. **Findings snapshot.** Enumerate `findings/FND-*.json`:
-   - Count by severity: `CRITICAL`, `HIGH`, `MEDIUM`, `LOW`, `INFO`
-   - Count by confidence: `HIGH`, `MEDIUM`, `LOW`
-   - Count by status: `open`, `triaged`, `in-progress`, `fixed`, `verified`, `needs-human`, `wontfix`, `UNVERIFIED`
+   - Count by severity: `critical`, `high`, `medium`, `low`, `info`
+   - Count by confidence: `high`, `medium`, `low`
+   - Count by status: `open`, `triaged`, `in-progress`, `fixed`, `verified`, `needs-human`, `wontfix`, `deferred`, `unverified`
    - Count of `doc-drift` findings (they route differently)
 
 4. **Triage snapshot** (if `triage.json` exists):
@@ -44,9 +44,9 @@ Read-only snapshot. Dispatch `@audit-orchestrator` but instruct it to dispatch *
 
    ```
    No scope.json / manifest.json?           → /audit:init
-   Any file with status = "PARTIAL"?        → /audit:continue
+   Any file with status = "partial"?        → /audit:continue
    Any file with status = "not-started"?    → /audit:run
-   Files COMPLETE but no triage.json?       → /audit:triage
+   Files complete but no triage.json?       → /audit:triage
    Triage exists with unverified fix-units? → /audit:fix
    Everything verified / deferred?          → /audit:summary
    ```
@@ -57,14 +57,14 @@ Read-only snapshot. Dispatch `@audit-orchestrator` but instruct it to dispatch *
    ┌─ Audit Status ────────────────────────────────────────
    │
    │  Coverage: <Y>/<X> files · <Z>/<total> lines · <pct>%
-   │    ├─ COMPLETE:    <n>
-   │    ├─ PARTIAL:     <n>  (resume: <path>:<line>)
+   │    ├─ complete:    <n>
+   │    ├─ partial:     <n>  (resume: <path>:<line>)
    │    ├─ not-started: <n>
    │    └─ failed:      <n>
    │
    │  Findings: <total>
-   │    Severity:    <C critical>  <H high>  <M medium>  <L low>  <I info>
-   │    Confidence:  <H high>  <M medium>  <L low>
+   │    Severity:    <c critical>  <h high>  <m medium>  <l low>  <i info>
+   │    Confidence:  <h high>  <m medium>  <l low>
    │    Status:
    │      open:         <n>
    │      triaged:      <n>
@@ -73,7 +73,8 @@ Read-only snapshot. Dispatch `@audit-orchestrator` but instruct it to dispatch *
    │      verified:     <n>  ✓
    │      needs-human:  <n>  ⚠
    │      wontfix:      <n>
-   │      UNVERIFIED:   <n>
+   │      deferred:     <n>
+   │      unverified:   <n>
    │
    │  Triage: <n> fix-units
    │    Auto-fix eligible: <a>

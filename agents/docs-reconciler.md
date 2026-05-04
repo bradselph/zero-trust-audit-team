@@ -129,8 +129,8 @@ Finding status: verified.
 
 In all of these: do not fix the docs. Instead:
 
-- Update the finding's `kind: "bug"` (was `observation`), `type: "spec-violation"`, and `status: "needs-human"`
-- Add a dissent note: `"docs-reconciler assessment: doc is correct per <spec/intent>. Code violates it at <line>. Recommend re-routing to fix-implementer as a bug."`
+- Update the finding's `type: "spec-violation"`, `severity` to at least `medium`, and `status: "needs-human"`
+- Add a dissent note in `fix_implementer_dissent`: `"docs-reconciler assessment: doc is correct per <spec/intent>. Code violates it at <line>. Recommend re-routing to fix-implementer as a bug."`
 - Do not edit either side.
 
 **The contradiction is semantic, not factual.** Sometimes the code and doc describe the same behavior differently, and the "contradiction" is a reading artifact. If you can find a reading under which both are correct: update the finding to `status: "wontfix"` with reason `"re-read on review — no actual contradiction"`, and note the reading.

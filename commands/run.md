@@ -16,9 +16,9 @@ Execute the chunked audit. Dispatch `@audit-orchestrator`.
    
    If any are missing, stop and tell the user to run `/audit:init` first.
 
-2. **Find the next file.** From `coverage.json`, pick the first file whose status is `"not-started"` or `"PARTIAL"`. Respect manifest ordering.
+2. **Find the next file.** From `coverage.json`, pick the first file whose status is `"not-started"` or `"partial"`. Respect manifest ordering.
    - If none exists, go to step 5 (all files done).
-   - If the file's status is `"PARTIAL"`, the resume line is in `coverage.json.files[file].resume_at`.
+   - If the file's status is `"partial"`, the resume line is in `coverage.json.files[file].resume_at`.
 
 3. **Dispatch the auditor.** Pass the target file and resume line (if any):
 
@@ -39,7 +39,7 @@ Execute the chunked audit. Dispatch `@audit-orchestrator`.
    ```
    Audit complete.
    Coverage: 100% (<n>/<n> files, <m>/<m> lines)
-   Findings: <C critical> <H high> <M medium> <L low> <I info>
+   Findings: <c critical> <h high> <m medium> <l low> <i info>
    
    Next: /audit:triage to build the remediation plan.
    ```
@@ -53,5 +53,5 @@ Never dispatch the auditor on multiple files simultaneously. The auditor is desi
 ## Failure handling
 
 - **Auditor returns without a STATUS marker**: redispatch with "your previous output lacked a STATUS marker; please emit one".
-- **Auditor claims COMPLETE but coverage.json wasn't updated**: redispatch.
+- **Auditor claims `STATUS: COMPLETE` but coverage.json wasn't updated**: redispatch.
 - **Same file fails twice**: mark it `status: "audit-failed"` in coverage.json with the failure reason, skip to next, and flag in the user-facing summary.

@@ -42,17 +42,18 @@ For code/doc contradictions flagged by the auditor (finding `type: "doc-drift"`)
 
 ## Invariants you enforce
 
-- A file is "reviewed" **only** when `coverage.json` records it as `status: "COMPLETE"`. Anything else is partial.
+- A file is "reviewed" **only** when `coverage.json` records it as `status: "complete"` (lowercase). Anything else is partial.
 - A finding is "verified" **only** when its status is `verified` AND a `log/fix-FND-NNNN.md` entry exists with a re-verifier trace.
 - Coverage percentages come from `coverage.json`. Do not compute them on the fly from the manifest — that drift is where fabrication starts.
 - If a specialist returns without an evidence block (snippet + anchor + trace), reject the output and redispatch. Do not promote unverified claims.
+- **All JSON enum values are lowercase** — `severity`, `confidence`, file `status`, finding `status`. The `STATUS: COMPLETE | PARTIAL` marker in chat output stays uppercase (it's a control directive, not a JSON field).
 
 ## What you refuse
 
 - Running the whole audit in one turn. Chunk it.
 - Skipping triage and going straight from audit to fix. Findings need priority ordering before any code changes.
 - Fixing code during `/audit:run` or `/audit:triage`. Those phases are read-only.
-- Claiming `/audit:summary` coverage without every manifest file having `status: "COMPLETE"`.
+- Claiming `/audit:summary` coverage without every manifest file having `status: "complete"`.
 - Rewriting findings to seem more or less severe. The specialist's classification stands unless the specialist itself revises it with new evidence.
 
 ## Turn-by-turn protocol
@@ -78,15 +79,15 @@ Every turn, in order:
 Keep it tight. Every turn should look like:
 
 ```
-Coverage: files 4/12 · lines 587/2143 · open: 0C 3H 6M 2L
+Coverage: files 4/12 · lines 587/2143 · open: 0c 3h 6m 2l
 
 Dispatching @code-auditor on src/auth.ts (next in manifest)…
 
 [specialist output]
 
 State updated:
-- coverage.json: src/auth.ts → COMPLETE (142/142)
-- findings/: +FND-0008 (HIGH), +FND-0009 (MEDIUM)
+- coverage.json: src/auth.ts → complete (142/142)
+- findings/: +FND-0008 (high), +FND-0009 (medium)
 
 Next: /audit:run to continue, or /audit:status for a snapshot.
 ```

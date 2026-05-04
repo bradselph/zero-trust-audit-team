@@ -83,21 +83,21 @@ Claims without this evidence block are **invalid**. They must either be withheld
 
 ## 6. Severity and confidence
 
-Every finding is classified on two axes.
+Every finding is classified on two axes. **All values are lowercase.**
 
 **Severity:**
-- `CRITICAL` — exploitable security flaw, data loss/corruption, guaranteed crash on reachable path
-- `HIGH` — incorrect behavior on realistic inputs, unhandled error on common path, resource leak under load
-- `MEDIUM` — edge-case bug, missing validation without clear exploit, concurrency hazard under contention
-- `LOW` — defensive gap, minor correctness issue, unlikely edge case
-- `INFO` — redundancy, dead code, style/consistency, documentation drift
+- `critical` — exploitable security flaw, data loss/corruption, guaranteed crash on reachable path
+- `high` — incorrect behavior on realistic inputs, unhandled error on common path, resource leak under load
+- `medium` — edge-case bug, missing validation without clear exploit, concurrency hazard under contention
+- `low` — defensive gap, minor correctness issue, unlikely edge case
+- `info` — redundancy, dead code, style/consistency, documentation drift
 
 **Confidence:**
-- `HIGH` — fully traced to code evidence; failure mode is demonstrable
-- `MEDIUM` — evidence strong but one step relies on reasonable inference
-- `LOW` — evidence partial; depends on an unverified assumption
+- `high` — fully traced to code evidence; failure mode is demonstrable
+- `medium` — evidence strong but one step relies on reasonable inference
+- `low` — evidence partial; depends on an unverified assumption
 
-Separate **BUGS** (`CRITICAL`–`LOW`) from **OBSERVATIONS** (`INFO`). Do not mix.
+Separate **BUGS** (`critical`–`low`) from **OBSERVATIONS** (`info`). Do not mix.
 
 ## 7. Uncertainty handling
 
@@ -133,7 +133,32 @@ If mid-audit you hit a missing file, truncated context, or unresolved dependency
 
 Path: `.claude/audit-state/findings/FND-NNNN.json` (next available ID; look at existing files to determine `NNNN`).
 
-Schema in `.claude/audit-state/README.md`. All fields required.
+**Use this exact template — copy it verbatim, fill in values, do not rename or omit fields.** Use `null` for absent values, never omission. Real-world v1.0 runs invented `title`/`description`/`suggested_fix`, dropped `kind`, and used `line` instead of `line_start` — those drifts are now baked into the canonical schema below, so there is nothing to invent.
+
+```json
+{
+  "id": "FND-NNNN",
+  "file": "<path>",
+  "line": <int>,
+  "end_line": <int>,
+  "anchor": "<unique substring from snippet>",
+  "type": "<kebab-case type — see audit-state/README.md for preferred values>",
+  "severity": "critical | high | medium | low | info",
+  "confidence": "high | medium | low",
+  "title": "<one-sentence human-scannable summary>",
+  "description": "<full explanation: what breaks and why>",
+  "impact": "<concrete consequence — who/what is affected>",
+  "snippet": "<verbatim code, ≥5 lines of context>",
+  "trace": "<entry → branches → exit, including failure path>",
+  "status": "open",
+  "linked_fix_id": null,
+  "related_findings": [],
+  "detected_by": "code-auditor",
+  "fix_implementer_dissent": null
+}
+```
+
+All fields are required. The schema authority is `audit-state/README.md` — but do not point downstream agents at the README for fields you can fill in here. Always emit complete JSON.
 
 ### 10.2 Append audit block to per-file log
 
@@ -151,17 +176,18 @@ Execution Traces:
 - <symbol>: <entry> → <branches> → <exit>  [findings: none | see FND-NNNN]
 
 Bugs:
-  FND-NNNN [SEV:HIGH] [CONF:HIGH] [TYPE:silent-failure] <file>:<line>
+  FND-NNNN [sev:high] [conf:high] [type:silent-failure] <file>:<line>
+     Title: <one-sentence summary>
      Anchor: <unique substring>
      Snippet:
        <verbatim code, ≥5 lines context>
      Trace:
        <entry → branch → failure>
-     Explanation: <what breaks, why>
+     Description: <what breaks, why>
      Impact: <concrete consequence>
 
 Observations:
-  FND-NNNN [INFO] [TYPE:redundancy] <file>:<line> — <one-line description>
+  FND-NNNN [info] [type:redundancy] <file>:<line> — <one-line description>
 
 Cross-file Notes:
   <inconsistencies vs previously audited files, if any>
@@ -171,7 +197,22 @@ STATUS: COMPLETE | PARTIAL — resume at <file>:<line>, reason: <...>
 
 ### 10.3 Update coverage.json
 
-Read `.claude/audit-state/coverage.json`, update the entry for this file (status, inspected_lines, functions_analyzed, finding_ids). Recompute top-level rollups.
+Read `.claude/audit-state/coverage.json`, update the entry for this file, recompute top-level rollups. **Status values are lowercase: `not-started` · `partial` · `complete` · `audit-failed`.** Per-file shape:
+
+```json
+"<path>": {
+  "status": "complete",
+  "declared_lines": <int from manifest>,
+  "inspected_lines": <int actually read this turn>,
+  "functions_analyzed": <int>,
+  "resume_at": null,
+  "finding_ids": ["FND-NNNN", ...]
+}
+```
+
+If `STATUS: PARTIAL`, set `status: "partial"`, `resume_at: <line>`, and `resume_reason: "<token-limit | complexity | unresolved-dependency>"`.
+
+Recompute top-level rollups: `files_total`, `files_reviewed`, `lines_total`, `lines_reviewed`, `coverage_pct`. Do not change top-level field names — both `total_files` (v1.0 drift) and array-shaped `coverage` (v1.0 drift) are wrong.
 
 ### 10.4 Echo a compact summary
 
@@ -181,10 +222,12 @@ In your chat output:
 Audited: <path>
 Lines: <inspected>/<declared>
 Functions: <count>
-Findings: <C crit> <H high> <M med> <L low> <I info>
+Findings: <c critical> <h high> <m medium> <l low> <i info>
   → <FND-NNNN through FND-MMMM>
 STATUS: COMPLETE | PARTIAL — resume at <file>:<line>
 ```
+
+(The `STATUS:` marker stays uppercase — it is a control directive parsed by the orchestrator, not a JSON field.)
 
 ## 11. Failure conditions
 

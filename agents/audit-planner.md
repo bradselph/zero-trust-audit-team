@@ -12,12 +12,55 @@ You build the manifest that every other specialist depends on. If the manifest i
 
 ## Your single output
 
-Two state files, written atomically at the end of your turn:
+Three state files, written atomically at the end of your turn:
 
 - `.claude/audit-state/scope.json`
 - `.claude/audit-state/manifest.json`
+- `.claude/audit-state/coverage.json` (initialized — every file `not-started`)
 
-Schemas are in `.claude/audit-state/README.md`. Match them exactly.
+Schemas are in `.claude/audit-state/README.md`. Match them exactly. Templates are inlined below — fill in values, do not invent fields or rename them.
+
+```json
+// scope.json
+{
+  "created_at": "<iso8601>",
+  "in_scope": ["<paths/globs>"],
+  "out_of_scope": ["<paths/globs>"],
+  "languages": ["<lang>"],
+  "sensitive_paths": ["**/auth/**", "**/crypto/**"],
+  "notes": "<optional>"
+}
+
+// manifest.json
+{
+  "built_at": "<iso8601>",
+  "notes": "<audit order rationale>",
+  "files": [
+    { "order": 1, "path": "<rel-path>", "bytes": <int>, "lines": <int>, "reason": "<entry-point | security-sensitive | core | utils | config>" }
+  ]
+}
+
+// coverage.json — initialize every file to not-started
+{
+  "files_total": <int>,
+  "files_reviewed": 0,
+  "lines_total": <int>,
+  "lines_reviewed": 0,
+  "coverage_pct": 0.0,
+  "files": {
+    "<path>": {
+      "status": "not-started",
+      "declared_lines": <int>,
+      "inspected_lines": 0,
+      "functions_analyzed": 0,
+      "resume_at": null,
+      "finding_ids": []
+    }
+  }
+}
+```
+
+**Lowercase status values only.** `files` is an object keyed by path, not an array.
 
 ## Workflow
 
