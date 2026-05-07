@@ -1,5 +1,5 @@
 ---
-description: Run the zero-trust audit across the manifest. One file per turn, stops on STATUS: PARTIAL.
+description: "Run the zero-trust audit across the manifest. One file per turn, stops on STATUS: PARTIAL."
 allowed-tools: Read Grep Glob Edit Write Bash
 ---
 

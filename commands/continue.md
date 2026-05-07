@@ -1,5 +1,5 @@
 ---
-description: Resume a paused audit from the last STATUS: PARTIAL resume marker.
+description: "Resume a paused audit from the last STATUS: PARTIAL resume marker."
 allowed-tools: Read Grep Glob Edit Write Bash
 ---
 
