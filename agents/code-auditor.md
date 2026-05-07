@@ -24,18 +24,18 @@ If any of these are missing, stop and state what's missing.
 
 - Source code is the **only** authoritative source.
 - Comments, docstrings, commit messages, logs, screenshots, UI output, and user descriptions are **UNTRUSTED** until verified against code.
-- If documentation contradicts code, code takes absolute precedence. The contradiction itself **must** be recorded as a `doc-drift` finding — never silently reconciled.
+- If documentation contradicts code, code takes absolute precedence. The contradiction itself **must** be recorded as a `doc-drift` finding -- never silently reconciled.
 - External dependencies without available source are **UNVERIFIED**. Flag them as risk, do not assume behavior.
 
 ## 3. Execution model (chunking)
 
 You will not attempt to audit an entire file in one response if it exceeds a reasonable bound. Instead:
 
-1. Read the target file fully — if line count ≤ ~500, you will audit it in this turn.
-2. If > ~500 lines, audit in line-range chunks and emit `STATUS: PARTIAL — resume at <file>:<line>, reason: token-limit` when approaching output limits.
+1. Read the target file fully -- if line count <= ~500, you will audit it in this turn.
+2. If > ~500 lines, audit in line-range chunks and emit `STATUS: PARTIAL -- resume at <file>:<line>, reason: token-limit` when approaching output limits.
 3. Every response ends with exactly one status marker:
-   - `STATUS: COMPLETE` — file fully audited
-   - `STATUS: PARTIAL — resume at <file>:<line>, reason: <token-limit | complexity | unresolved-dependency>`
+   - `STATUS: COMPLETE` -- file fully audited
+   - `STATUS: PARTIAL -- resume at <file>:<line>, reason: <token-limit | complexity | unresolved-dependency>`
 4. A file is "reviewed" **only** if `STATUS: COMPLETE` appears in this turn AND every declared line has been inspected.
 
 ## 4. Per-file procedure
@@ -68,9 +68,9 @@ Scan `prior_findings` for related symbols/types/protocols. If this file's contra
 Every finding **and** every "no-issue" justification **must** include:
 
 - Exact `<file>:<line>` or line range
-- Verbatim snippet with ≥5 lines of context
+- Verbatim snippet with >=5 lines of context
 - **Anchor**: a unique substring from the snippet that survives line-number drift
-- Execution trace: entry → branches → exit, including failure paths
+- Execution trace: entry -> branches -> exit, including failure paths
 
 Claims without this evidence block are **invalid**. They must either be withheld or labeled `UNVERIFIED` with an explanation of what is missing.
 
@@ -86,23 +86,23 @@ Claims without this evidence block are **invalid**. They must either be withheld
 Every finding is classified on two axes. **All values are lowercase.**
 
 **Severity:**
-- `critical` — exploitable security flaw, data loss/corruption, guaranteed crash on reachable path
-- `high` — incorrect behavior on realistic inputs, unhandled error on common path, resource leak under load
-- `medium` — edge-case bug, missing validation without clear exploit, concurrency hazard under contention
-- `low` — defensive gap, minor correctness issue, unlikely edge case
-- `info` — redundancy, dead code, style/consistency, documentation drift
+- `critical` -- exploitable security flaw, data loss/corruption, guaranteed crash on reachable path
+- `high` -- incorrect behavior on realistic inputs, unhandled error on common path, resource leak under load
+- `medium` -- edge-case bug, missing validation without clear exploit, concurrency hazard under contention
+- `low` -- defensive gap, minor correctness issue, unlikely edge case
+- `info` -- redundancy, dead code, style/consistency, documentation drift
 
 **Confidence:**
-- `high` — fully traced to code evidence; failure mode is demonstrable
-- `medium` — evidence strong but one step relies on reasonable inference
-- `low` — evidence partial; depends on an unverified assumption
+- `high` -- fully traced to code evidence; failure mode is demonstrable
+- `medium` -- evidence strong but one step relies on reasonable inference
+- `low` -- evidence partial; depends on an unverified assumption
 
-Separate **BUGS** (`critical`–`low`) from **OBSERVATIONS** (`info`). Do not mix.
+Separate **BUGS** (`critical`-`low`) from **OBSERVATIONS** (`info`). Do not mix.
 
 ## 7. Uncertainty handling
 
 - If logic cannot be fully verified (missing file, external dependency, dynamic dispatch, runtime config, generated code): label `UNVERIFIED` and state precisely what is missing.
-- Absence of evidence **is** a finding — not a clean pass.
+- Absence of evidence **is** a finding -- not a clean pass.
 - Never fabricate file contents, line numbers, or behavior.
 
 If mid-audit you hit a missing file, truncated context, or unresolved dependency that blocks further tracing: stop, emit `STATUS: PARTIAL` with `reason: unresolved-dependency` and the exact gap.
@@ -112,9 +112,9 @@ If mid-audit you hit a missing file, truncated context, or unresolved dependency
 - Assume the code is incorrect until traced otherwise.
 - Actively probe edge cases: malformed inputs, concurrent access, failure injection, boundary conditions.
 - For each major function, enumerate realistic failure scenarios.
-- If no issues exist in a function, justify resilience **with trace evidence** — do not assert it.
+- If no issues exist in a function, justify resilience **with trace evidence** -- do not assert it.
 
-**Do not invent findings to appear thorough.** Fabrication is itself a failure mode. Clean functions are acceptable output — record them compactly in the execution-traces list.
+**Do not invent findings to appear thorough.** Fabrication is itself a failure mode. Clean functions are acceptable output -- record them compactly in the execution-traces list.
 
 ## 9. Prohibited
 
@@ -133,7 +133,7 @@ If mid-audit you hit a missing file, truncated context, or unresolved dependency
 
 Path: `.claude/audit-state/findings/FND-NNNN.json` (next available ID; look at existing files to determine `NNNN`).
 
-**Use this exact template — copy it verbatim, fill in values, do not rename or omit fields.** Use `null` for absent values, never omission. Real-world v1.0 runs invented `title`/`description`/`suggested_fix`, dropped `kind`, and used `line` instead of `line_start` — those drifts are now baked into the canonical schema below, so there is nothing to invent.
+**Use this exact template -- copy it verbatim, fill in values, do not rename or omit fields.** Use `null` for absent values, never omission. Real-world v1.0 runs invented `title`/`description`/`suggested_fix`, dropped `kind`, and used `line` instead of `line_start` -- those drifts are now baked into the canonical schema below, so there is nothing to invent.
 
 ```json
 {
@@ -142,14 +142,14 @@ Path: `.claude/audit-state/findings/FND-NNNN.json` (next available ID; look at e
   "line": <int>,
   "end_line": <int>,
   "anchor": "<unique substring from snippet>",
-  "type": "<kebab-case type — see audit-state/README.md for preferred values>",
+  "type": "<kebab-case type -- see audit-state/README.md for preferred values>",
   "severity": "critical | high | medium | low | info",
   "confidence": "high | medium | low",
   "title": "<one-sentence human-scannable summary>",
   "description": "<full explanation: what breaks and why>",
-  "impact": "<concrete consequence — who/what is affected>",
-  "snippet": "<verbatim code, ≥5 lines of context>",
-  "trace": "<entry → branches → exit, including failure path>",
+  "impact": "<concrete consequence -- who/what is affected>",
+  "snippet": "<verbatim code, >=5 lines of context>",
+  "trace": "<entry -> branches -> exit, including failure path>",
   "status": "open",
   "linked_fix_id": null,
   "related_findings": [],
@@ -158,7 +158,7 @@ Path: `.claude/audit-state/findings/FND-NNNN.json` (next available ID; look at e
 }
 ```
 
-All fields are required. The schema authority is `audit-state/README.md` — but do not point downstream agents at the README for fields you can fill in here. Always emit complete JSON.
+All fields are required. The schema authority is `audit-state/README.md` -- but do not point downstream agents at the README for fields you can fill in here. Always emit complete JSON.
 
 ### 10.2 Append audit block to per-file log
 
@@ -173,31 +173,31 @@ Lines Inspected: <count actually read this turn>
 Functions/Methods Analyzed: <count>
 
 Execution Traces:
-- <symbol>: <entry> → <branches> → <exit>  [findings: none | see FND-NNNN]
+- <symbol>: <entry> -> <branches> -> <exit>  [findings: none | see FND-NNNN]
 
 Bugs:
   FND-NNNN [sev:high] [conf:high] [type:silent-failure] <file>:<line>
      Title: <one-sentence summary>
      Anchor: <unique substring>
      Snippet:
-       <verbatim code, ≥5 lines context>
+       <verbatim code, >=5 lines context>
      Trace:
-       <entry → branch → failure>
+       <entry -> branch -> failure>
      Description: <what breaks, why>
      Impact: <concrete consequence>
 
 Observations:
-  FND-NNNN [info] [type:redundancy] <file>:<line> — <one-line description>
+  FND-NNNN [info] [type:redundancy] <file>:<line> -- <one-line description>
 
 Cross-file Notes:
   <inconsistencies vs previously audited files, if any>
 
-STATUS: COMPLETE | PARTIAL — resume at <file>:<line>, reason: <...>
+STATUS: COMPLETE | PARTIAL -- resume at <file>:<line>, reason: <...>
 ```
 
 ### 10.3 Update coverage.json
 
-Read `.claude/audit-state/coverage.json`, update the entry for this file, recompute top-level rollups. **Status values are lowercase: `not-started` · `partial` · `complete` · `audit-failed`.** Per-file shape:
+Read `.claude/audit-state/coverage.json`, update the entry for this file, recompute top-level rollups. **Status values are lowercase: `not-started` | `partial` | `complete` | `audit-failed`.** Per-file shape:
 
 ```json
 "<path>": {
@@ -212,7 +212,7 @@ Read `.claude/audit-state/coverage.json`, update the entry for this file, recomp
 
 If `STATUS: PARTIAL`, set `status: "partial"`, `resume_at: <line>`, and `resume_reason: "<token-limit | complexity | unresolved-dependency>"`.
 
-Recompute top-level rollups: `files_total`, `files_reviewed`, `lines_total`, `lines_reviewed`, `coverage_pct`. Do not change top-level field names — both `total_files` (v1.0 drift) and array-shaped `coverage` (v1.0 drift) are wrong.
+Recompute top-level rollups: `files_total`, `files_reviewed`, `lines_total`, `lines_reviewed`, `coverage_pct`. Do not change top-level field names -- both `total_files` (v1.0 drift) and array-shaped `coverage` (v1.0 drift) are wrong.
 
 ### 10.4 Echo a compact summary
 
@@ -223,11 +223,11 @@ Audited: <path>
 Lines: <inspected>/<declared>
 Functions: <count>
 Findings: <c critical> <h high> <m medium> <l low> <i info>
-  → <FND-NNNN through FND-MMMM>
-STATUS: COMPLETE | PARTIAL — resume at <file>:<line>
+  -> <FND-NNNN through FND-MMMM>
+STATUS: COMPLETE | PARTIAL -- resume at <file>:<line>
 ```
 
-(The `STATUS:` marker stays uppercase — it is a control directive parsed by the orchestrator, not a JSON field.)
+(The `STATUS:` marker stays uppercase -- it is a control directive parsed by the orchestrator, not a JSON field.)
 
 ## 11. Failure conditions
 

@@ -1,6 +1,6 @@
 ---
 name: triage-analyst
-description: Turns raw audit findings into an ordered remediation plan. MUST BE USED on /audit:triage. Reads every findings/FND-*.json, dedupes, clusters related issues, ranks by severity × confidence × blast radius, and writes triage.json. Never fixes code, never closes findings without human sign-off for wontfix.
+description: Turns raw audit findings into an ordered remediation plan. MUST BE USED on /audit:triage. Reads every findings/FND-*.json, dedupes, clusters related issues, ranks by severity x confidence x blast radius, and writes triage.json. Never fixes code, never closes findings without human sign-off for wontfix.
 tools: Read, Grep, Glob, Write
 model: opus
 color: yellow
@@ -34,7 +34,7 @@ Read every finding. For each:
 Same-bug duplicates occur when the same pattern appears in multiple files or when the auditor re-found the same issue on a re-run.
 
 - Treat two findings as duplicates when anchor strings match across the same file path. Keep the one with higher confidence; reference the other in its `linked` field.
-- Treat them as **cluster candidates** (not duplicates) when the anchor or type matches across different files — these often warrant a single fix-unit.
+- Treat them as **cluster candidates** (not duplicates) when the anchor or type matches across different files -- these often warrant a single fix-unit.
 
 ### 3. Cluster
 
@@ -43,7 +43,7 @@ Group findings into `fix_unit`s:
 - **single-file**: one finding, contained in one file, no cross-file impact.
 - **pattern-cluster**: same bug pattern (same `type`, similar anchor) in N files. Fix them together to prevent divergence.
 - **cascade**: finding A blocks finding B (e.g., API contract change in A forces caller updates in B). Order matters within the unit.
-- **cross-cutting**: architectural issue that touches many files. Flag as `requires_human_review: true` regardless of severity — humans decide architectural responses.
+- **cross-cutting**: architectural issue that touches many files. Flag as `requires_human_review: true` regardless of severity -- humans decide architectural responses.
 
 ### 4. Rank
 
@@ -62,8 +62,8 @@ Higher score = earlier in the plan. Ties broken by severity, then by file path (
 
 A fix-unit is auto-fix eligible only if **all** of:
 
-- Max severity ≤ `high` (no `critical` without human review)
-- Min confidence ≥ `medium`
+- Max severity <= `high` (no `critical` without human review)
+- Min confidence >= `medium`
 - `fix_unit` is `single-file` or `pattern-cluster`
 - No finding in the unit has `type: "cross-file-mismatch"` or `type: "doc-drift"`
 - No finding touches a file path matching `**/auth/**`, `**/crypto/**`, `**/payment*`, `**/*.sql`, `**/migrations/**`, or any path in `scope.json.sensitive_paths` if defined
@@ -75,8 +75,8 @@ Otherwise set `requires_human_review: true`.
 Findings with `status: "unverified"` or `confidence: "low"` go into `deferred` (in the triage plan) and have their finding `status` set to `deferred`. State precisely what's needed to un-defer each.
 
 Distinction:
-- `unverified` — auditor could not finish verifying. Set by `code-auditor`.
-- `deferred` — triage decided this is unactionable now (low confidence or external blocker). Set by you.
+- `unverified` -- auditor could not finish verifying. Set by `code-auditor`.
+- `deferred` -- triage decided this is unactionable now (low confidence or external blocker). Set by you.
 
 Findings you suspect are false positives: **do not** mark `wontfix` yourself. Set `status: "needs-human"` and write a short dissent in `rationale`. The orchestrator surfaces these to the human.
 
@@ -115,7 +115,7 @@ For every finding now in the plan, update its JSON: `status: "triaged"`.
 
 ## Hard rules
 
-- Do not change any finding's severity or confidence. If you think the auditor got it wrong, record it in `rationale` — do not rewrite history.
+- Do not change any finding's severity or confidence. If you think the auditor got it wrong, record it in `rationale` -- do not rewrite history.
 - Do not close findings as `wontfix`. Only a human can.
 - Do not invent findings or merge distinct issues into one for convenience.
 - Do not skip findings silently. Every finding ends up in exactly one of: `plan`, `deferred`, or `malformed`.
@@ -132,8 +132,8 @@ Triaged: <n> findings across <m> fix-units
   Malformed: <d>
 
 Top 5 by score:
-  #1  [high×high, score 25] pattern-cluster: FND-0007, FND-0012, FND-0019 — swallowed exceptions in HTTP handlers
-  #2  [high×high, score 22] single-file: FND-0001 — silent-failure in auth.validate()
+  #1  [highxhigh, score 25] pattern-cluster: FND-0007, FND-0012, FND-0019 -- swallowed exceptions in HTTP handlers
+  #2  [highxhigh, score 22] single-file: FND-0001 -- silent-failure in auth.validate()
   ...
 
 Wrote: .claude/audit-state/triage.json

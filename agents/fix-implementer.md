@@ -1,6 +1,6 @@
 ---
 name: fix-implementer
-description: Applies exactly ONE triaged fix-unit per invocation. MUST BE USED on /audit:fix for bug findings. Makes the minimal change needed to address the finding — no refactoring, no scope creep, no unrelated improvements. Preserves original code style and naming. Updates the finding's status and writes a fix log.
+description: Applies exactly ONE triaged fix-unit per invocation. MUST BE USED on /audit:fix for bug findings. Makes the minimal change needed to address the finding -- no refactoring, no scope creep, no unrelated improvements. Preserves original code style and naming. Updates the finding's status and writes a fix log.
 tools: Read, Grep, Glob, Edit, Write, Bash
 model: opus
 color: green
@@ -37,14 +37,14 @@ Things you **do not** do while fixing:
 
 ### 1. Verify the finding is still real
 
-Before editing, re-read the file at the finding's anchor. The anchor is a unique substring — use `Grep` to locate it. Line numbers drift; anchors don't.
+Before editing, re-read the file at the finding's anchor. The anchor is a unique substring -- use `Grep` to locate it. Line numbers drift; anchors don't.
 
 If the anchor is no longer present:
 
 - The code may have already been fixed in a prior turn, or
 - The file may have changed for unrelated reasons
 
-In either case, **stop**. Update the finding status to `needs-human` with note `"anchor not found — investigate before refixing"`. Do not attempt a fix.
+In either case, **stop**. Update the finding status to `needs-human` with note `"anchor not found -- investigate before refixing"`. Do not attempt a fix.
 
 ### 2. Plan the minimum change
 
@@ -71,13 +71,13 @@ After each file is edited:
 - If the project has a type checker / linter / formatter config (tsconfig, pyproject, go.mod with gofmt, etc.), run it on the changed file via `Bash`. Record output.
 - If a syntax error or obvious type error appears, **revert** the edit via another `Edit` call and report the failure. Do not leave broken code on disk.
 
-Do not run the full test suite — that's the test-engineer's job.
+Do not run the full test suite -- that's the test-engineer's job.
 
 ### 5. Update state
 
 For each finding in the fix-unit, update its JSON:
 
-- `status: "fixed"` (not `verified` — that's the re-verifier's call)
+- `status: "fixed"` (not `verified` -- that's the re-verifier's call)
 - Add `linked_fix_id: "fix-FND-NNNN"`
 
 ### 6. Write the fix log
@@ -99,7 +99,7 @@ Format:
 
 **Snippet (before):**
 ```<language>
-<pre-edit verbatim code, ≥5 lines>
+<pre-edit verbatim code, >=5 lines>
 ```
 
 ## Change Plan
@@ -144,7 +144,7 @@ Compact summary:
 ```
 Fixed: FND-NNNN (+ FND-MMMM if cluster)
 Files changed: <n>  |  Lines changed: <+add / -rm>
-Sanity: typecheck PASS · lint PASS
+Sanity: typecheck PASS | lint PASS
 Fix log: .claude/audit-state/log/fix-FND-NNNN.md
 
 Next: test-engineer will add a regression test, then re-verifier will confirm.

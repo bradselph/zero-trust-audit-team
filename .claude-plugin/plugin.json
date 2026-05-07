@@ -1,11 +1,12 @@
 {
-  "name": "zero-trust-audit-team",
-  "description": "Zero-trust code audit team — plan, audit, triage, fix, test, and re-verify your codebase with eight specialized agents and seven slash commands. Persistent state survives /clear and context resets.",
-  "version": "1.1.0",
+  "name": "audit",
+  "description": "Zero-trust code audit team -- plan, audit, triage, fix, test, and re-verify your codebase with eight specialized agents and seven slash commands. Persistent state survives /clear and context resets.",
+  "version": "1.1.1",
   "author": {
     "name": "bradselph"
   },
   "homepage": "https://github.com/bradselph/zero-trust-audit-team",
   "repository": "https://github.com/bradselph/zero-trust-audit-team",
-  "license": "MIT"
+  "license": "MIT",
+  "keywords": ["audit", "code-review", "zero-trust", "static-analysis", "testing"]
 }

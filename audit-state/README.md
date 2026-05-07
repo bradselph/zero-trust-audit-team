@@ -1,8 +1,8 @@
-# Audit State — Schema Reference
+# Audit State -- Schema Reference
 
-All agents read from and write to this directory. Every file is plain JSON or Markdown — diffable, reviewable, and persistent across `/clear`.
+All agents read from and write to this directory. Every file is plain JSON or Markdown -- diffable, reviewable, and persistent across `/clear`.
 
-> **Schema policy.** The templates below are the *only* legal shapes. Field names, casing, and enums are normative. Agents must copy these templates verbatim and fill in values — they must not invent fields, rename fields, or change casing. Two real-world deployments produced 12 schema-drift bugs between them; this document is the response.
+> **Schema policy.** The templates below are the *only* legal shapes. Field names, casing, and enums are normative. Agents must copy these templates verbatim and fill in values -- they must not invent fields, rename fields, or change casing. Two real-world deployments produced 12 schema-drift bugs between them; this document is the response.
 
 ---
 
@@ -15,7 +15,7 @@ All agents read from and write to this directory. Every file is plain JSON or Ma
   "out_of_scope": ["vendor/", "node_modules/", "dist/", "*.min.js"],
   "languages": ["go", "typescript"],
   "sensitive_paths": ["**/auth/**", "**/crypto/**", "**/payment*"],
-  "notes": "optional — exclusion rationale, edge cases"
+  "notes": "optional -- exclusion rationale, edge cases"
 }
 ```
 
@@ -80,7 +80,7 @@ All agents read from and write to this directory. Every file is plain JSON or Ma
 }
 ```
 
-**Valid `status` values** (lowercase): `not-started` · `partial` · `complete` · `audit-failed`
+**Valid `status` values** (lowercase): `not-started` | `partial` | `complete` | `audit-failed`
 
 **Top-level shape is an object, not an array.** Per-file entries are keyed by path under `files`. Do not flatten to `[ {path, status}, ... ]`.
 
@@ -103,8 +103,8 @@ All fields are required (use `null` for absent values, not omission). IDs are ze
   "title": "validateToken returns undefined on expired tokens",
   "description": "validateToken silently returns undefined on expired tokens instead of returning false or throwing. Callers that check truthiness are fooled into treating the failure as success.",
   "impact": "Authentication bypass on any route that calls validateToken() and checks return value with truthy/falsy test rather than strict equality.",
-  "snippet": "<verbatim code, ≥5 lines of context>",
-  "trace": "validateToken() called with expired token → line 87 branch taken → function returns undefined instead of false → caller at routes.ts:42 checks truthiness, treats undefined as falsy, proceeds with unauthenticated request",
+  "snippet": "<verbatim code, >=5 lines of context>",
+  "trace": "validateToken() called with expired token -> line 87 branch taken -> function returns undefined instead of false -> caller at routes.ts:42 checks truthiness, treats undefined as falsy, proceeds with unauthenticated request",
   "status": "open",
   "linked_fix_id": null,
   "related_findings": [],
@@ -114,30 +114,30 @@ All fields are required (use `null` for absent values, not omission). IDs are ze
 ```
 
 **Field notes:**
-- `line` is the start line (single-line findings: `end_line` equals `line`). Do not use `line_start`/`line_end` — those names were the v1.0 spec but no real run ever used them.
+- `line` is the start line (single-line findings: `end_line` equals `line`). Do not use `line_start`/`line_end` -- those names were the v1.0 spec but no real run ever used them.
 - `title` is a one-sentence, human-scannable summary. `description` is the full explanation. `impact` is the concrete consequence. Three distinct fields, each with one job.
 - The v1.0 `kind` field (`bug` / `observation`) is removed. `severity: "info"` encodes observations; everything else is a bug.
 
-**Valid `type` values** (preferred — kebab-case, prefer reusing values seen in prior findings):
-- Behavior bugs: `silent-failure` · `logic-error` · `unreachable-code` · `dead-code` · `redundancy`
-- Resources & concurrency: `resource-leak` · `concurrency-hazard` · `race-condition` · `toctou`
-- Security primitives: `input-validation` · `insecure-pattern` · `injection` · `buffer-overflow` · `null-deref` · `crypto` · `path-traversal` · `directory-hijack`
-- Cross-cutting: `cross-file-mismatch` · `doc-drift` · `spec-violation` · `incomplete-feature`
+**Valid `type` values** (preferred -- kebab-case, prefer reusing values seen in prior findings):
+- Behavior bugs: `silent-failure` | `logic-error` | `unreachable-code` | `dead-code` | `redundancy`
+- Resources & concurrency: `resource-leak` | `concurrency-hazard` | `race-condition` | `toctou`
+- Security primitives: `input-validation` | `insecure-pattern` | `injection` | `buffer-overflow` | `null-deref` | `crypto` | `path-traversal` | `directory-hijack`
+- Cross-cutting: `cross-file-mismatch` | `doc-drift` | `spec-violation` | `incomplete-feature`
 
-If none of the above fit, you may introduce a new kebab-case type — but check `findings/` first for an existing match. The triage-analyst clusters by `type`, so synonym proliferation hurts.
+If none of the above fit, you may introduce a new kebab-case type -- but check `findings/` first for an existing match. The triage-analyst clusters by `type`, so synonym proliferation hurts.
 
-**Valid `severity` values** (lowercase): `critical` · `high` · `medium` · `low` · `info`
+**Valid `severity` values** (lowercase): `critical` | `high` | `medium` | `low` | `info`
 
-**Valid `confidence` values** (lowercase): `high` · `medium` · `low`
+**Valid `confidence` values** (lowercase): `high` | `medium` | `low`
 
-**Valid `status` values** (lifecycle): `open` → `triaged` → `in-progress` → `fixed` → `verified`
-**Terminal:** `verified` · `wontfix` · `needs-human` · `deferred` · `unverified`
+**Valid `status` values** (lifecycle): `open` -> `triaged` -> `in-progress` -> `fixed` -> `verified`
+**Terminal:** `verified` | `wontfix` | `needs-human` | `deferred` | `unverified`
 
 - `deferred`: triage decided this finding cannot be acted on now (low confidence, blocked on external info). Distinct from `unverified`, which means the auditor itself could not finish verifying.
-- `wontfix`: only humans set this, except for one case — `fix-implementer` may set `wontfix` if the file no longer exists (`wontfix_reason: "file deleted since audit"`).
+- `wontfix`: only humans set this, except for one case -- `fix-implementer` may set `wontfix` if the file no longer exists (`wontfix_reason: "file deleted since audit"`).
 - `needs-human`: the agents disagree, the fix is risky, or the finding is in a `sensitive_paths` location.
 
-**`detected_by` values**: `code-auditor` · `fix-implementer` · `re-verifier`
+**`detected_by` values**: `code-auditor` | `fix-implementer` | `re-verifier`
 
 ---
 
@@ -178,7 +178,7 @@ If none of the above fit, you may introduce a new kebab-case type — but check 
   "deferred": [
     {
       "finding_ids": ["FND-0005"],
-      "reason": "low confidence — external dependency behavior not verifiable from source",
+      "reason": "low confidence -- external dependency behavior not verifiable from source",
       "needed_to_verify": "Access to redis-client source or integration test that exercises the timeout path"
     }
   ],
@@ -191,13 +191,13 @@ If none of the above fit, you may introduce a new kebab-case type — but check 
 }
 ```
 
-**Valid `fix_unit` values**: `single-file` · `pattern-cluster` · `cascade` · `cross-cutting`
+**Valid `fix_unit` values**: `single-file` | `pattern-cluster` | `cascade` | `cross-cutting`
 
 ---
 
 ## `log/audit-<sanitized-path>.md`
 
-Written by `code-auditor` per file. File path sanitized: `/` → `-`, `.` → `-`.
+Written by `code-auditor` per file. File path sanitized: `/` -> `-`, `.` -> `-`.
 
 Example path: `log/audit-src-auth-ts.md`
 
@@ -210,29 +210,29 @@ Content: execution traces, finding summaries, STATUS marker. See `code-auditor` 
 Written by `fix-implementer`, then appended to by `test-engineer` and `re-verifier`.
 
 Sections (in order of authorship):
-1. **Fix Record** — original finding summary, change plan, edits applied, sanity checks (`fix-implementer`)
-2. **Tests** — regression test code, Phase A/B results (`test-engineer`)
-3. **Re-Verifier Verdict** — CONFIRM/REJECT with execution trace (`re-verifier`)
+1. **Fix Record** -- original finding summary, change plan, edits applied, sanity checks (`fix-implementer`)
+2. **Tests** -- regression test code, Phase A/B results (`test-engineer`)
+3. **Re-Verifier Verdict** -- CONFIRM/REJECT with execution trace (`re-verifier`)
 
 ---
 
 ## `FINAL_REPORT.md`
 
-Written by the orchestrator on `/audit:summary`. Only exists when the audit is complete. Do not write to this file manually — its contents are a factual reconstruction from the state files above.
+Written by the orchestrator on `/audit:summary`. Only exists when the audit is complete. Do not write to this file manually -- its contents are a factual reconstruction from the state files above.
 
 ---
 
 ## State transitions (summary)
 
 ```
-File:     not-started → partial → complete
-                                └→ audit-failed
+File:     not-started -> partial -> complete
+                                +-> audit-failed
 
-Finding:  open → triaged → in-progress → fixed → verified
-                                      └→ needs-human
-                         └→ needs-human
-                         └→ deferred       (triage cannot act now)
-               └→ unverified                (auditor could not finish)
+Finding:  open -> triaged -> in-progress -> fixed -> verified
+                                      +-> needs-human
+                         +-> needs-human
+                         +-> deferred       (triage cannot act now)
+               +-> unverified                (auditor could not finish)
                                             wontfix (humans, or file-deleted)
 ```
 

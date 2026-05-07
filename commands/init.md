@@ -23,7 +23,7 @@ The user's scope hint: `$ARGUMENTS`
 
 3. Once scope is confirmed, dispatch:
 
-   > `@audit-planner` — please build the FILE_MANIFEST for scope <paste confirmed scope>.
+   > `@audit-planner` -- please build the FILE_MANIFEST for scope <paste confirmed scope>.
 
 4. When the planner returns, verify:
    - `scope.json` exists and matches the confirmed scope
@@ -36,7 +36,7 @@ The user's scope hint: `$ARGUMENTS`
    Audit initialized.
    Scope: <languages>, <n> files, <total> lines
    Excluded: <n> files (<reason summary>)
-   Order: entry-points → security-sensitive → core → utils → config
+   Order: entry-points -> security-sensitive -> core -> utils -> config
    
    Next: run /audit:run to begin.
    ```

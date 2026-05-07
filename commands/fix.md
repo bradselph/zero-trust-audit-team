@@ -1,5 +1,5 @@
 ---
-description: Process one fix-unit through implementer → test-engineer → re-verifier.
+description: Process one fix-unit through implementer -> test-engineer -> re-verifier.
 argument-hint: [FND-id | next]
 allowed-tools: Read Grep Glob Edit Write Bash
 ---
@@ -30,7 +30,7 @@ The user's target: `$ARGUMENTS` (a specific `FND-NNNN`, the word `next`, or empt
 
 5. **Dispatch fix:**
 
-   > `@fix-implementer` — apply fix for fix-unit covering findings `<FND-NNNN, FND-MMMM, ...>`. Work through them in the unit's declared order. Minimal diff, no scope creep.
+   > `@fix-implementer` -- apply fix for fix-unit covering findings `<FND-NNNN, FND-MMMM, ...>`. Work through them in the unit's declared order. Minimal diff, no scope creep.
 
    (or `@docs-reconciler` with the same payload for doc-drift)
 
@@ -39,11 +39,11 @@ The user's target: `$ARGUMENTS` (a specific `FND-NNNN`, the word `next`, or empt
    - Verify every targeted finding's status is now `"fixed"`
    - Verify no unintended files were modified (compare `git diff` file list against the fix-unit's declared files)
    
-   If any verification fails: report the gap, set findings back to `"triaged"`, and stop — do not proceed to testing.
+   If any verification fails: report the gap, set findings back to `"triaged"`, and stop -- do not proceed to testing.
 
 7. **Dispatch test-engineer** (skip this step for `docs-reconciler` fixes):
 
-   > `@test-engineer` — write regression test + run suite for fix at `log/fix-FND-NNNN.md`.
+   > `@test-engineer` -- write regression test + run suite for fix at `log/fix-FND-NNNN.md`.
 
 8. **On test-engineer return:**
    - Verify the fix log has a Tests section
@@ -52,7 +52,7 @@ The user's target: `$ARGUMENTS` (a specific `FND-NNNN`, the word `next`, or empt
 
 9. **Dispatch re-verifier:**
 
-   > `@re-verifier` — independently verify fix for `<FND-NNNN>`. Finding JSON: `findings/FND-NNNN.json`. Fix log: `log/fix-FND-NNNN.md`.
+   > `@re-verifier` -- independently verify fix for `<FND-NNNN>`. Finding JSON: `findings/FND-NNNN.json`. Fix log: `log/fix-FND-NNNN.md`.
 
 10. **On re-verifier return:**
     - If verdict is `CONFIRM`: findings should now be `"verified"`. Report success.
@@ -77,6 +77,6 @@ The user's target: `$ARGUMENTS` (a specific `FND-NNNN`, the word `next`, or empt
 ## Hard rules
 
 - One fix-unit per `/audit:fix` invocation. Do not loop into the next unit automatically.
-- Never skip test-engineer. Even if the fix looks trivial. Even if there's no test framework — in that case test-engineer produces `test_status: "manual"` and the fix still requires re-verifier approval.
+- Never skip test-engineer. Even if the fix looks trivial. Even if there's no test framework -- in that case test-engineer produces `test_status: "manual"` and the fix still requires re-verifier approval.
 - Never skip re-verifier. The implementer's own claim that the fix works is not sufficient.
 - If any step is rejected, do not auto-retry. The user decides whether to retry, investigate, or mark `needs-human`.

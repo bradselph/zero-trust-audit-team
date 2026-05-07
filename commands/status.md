@@ -5,7 +5,7 @@ allowed-tools: Read Grep Glob
 
 # /audit:status
 
-Read-only snapshot. Dispatch `@audit-orchestrator` but instruct it to dispatch **no specialists** — pure state read.
+Read-only snapshot. Dispatch `@audit-orchestrator` but instruct it to dispatch **no specialists** -- pure state read.
 
 ## Orchestrator, on receipt:
 
@@ -43,48 +43,48 @@ Read-only snapshot. Dispatch `@audit-orchestrator` but instruct it to dispatch *
 5. **Determine next recommended action** using this decision tree:
 
    ```
-   No scope.json / manifest.json?           → /audit:init
-   Any file with status = "partial"?        → /audit:continue
-   Any file with status = "not-started"?    → /audit:run
-   Files complete but no triage.json?       → /audit:triage
-   Triage exists with unverified fix-units? → /audit:fix
-   Everything verified / deferred?          → /audit:summary
+   No scope.json / manifest.json?           -> /audit:init
+   Any file with status = "partial"?        -> /audit:continue
+   Any file with status = "not-started"?    -> /audit:run
+   Files complete but no triage.json?       -> /audit:triage
+   Triage exists with unverified fix-units? -> /audit:fix
+   Everything verified / deferred?          -> /audit:summary
    ```
 
 6. **Output format:**
 
    ```
-   ┌─ Audit Status ────────────────────────────────────────
-   │
-   │  Coverage: <Y>/<X> files · <Z>/<total> lines · <pct>%
-   │    ├─ complete:    <n>
-   │    ├─ partial:     <n>  (resume: <path>:<line>)
-   │    ├─ not-started: <n>
-   │    └─ failed:      <n>
-   │
-   │  Findings: <total>
-   │    Severity:    <c critical>  <h high>  <m medium>  <l low>  <i info>
-   │    Confidence:  <h high>  <m medium>  <l low>
-   │    Status:
-   │      open:         <n>
-   │      triaged:      <n>
-   │      in-progress:  <n>
-   │      fixed:        <n>  (awaiting re-verifier)
-   │      verified:     <n>  ✓
-   │      needs-human:  <n>  ⚠
-   │      wontfix:      <n>
-   │      deferred:     <n>
-   │      unverified:   <n>
-   │
-   │  Triage: <n> fix-units
-   │    Auto-fix eligible: <a>
-   │    Human review:      <b>
-   │    Complete:          <c>
-   │    Deferred:          <d>
-   │
-   │  Next: <recommended command>
-   │
-   └───────────────────────────────────────────────────────
+   +- Audit Status ----------------------------------------
+   |
+   |  Coverage: <Y>/<X> files | <Z>/<total> lines | <pct>%
+   |    +- complete:    <n>
+   |    +- partial:     <n>  (resume: <path>:<line>)
+   |    +- not-started: <n>
+   |    +- failed:      <n>
+   |
+   |  Findings: <total>
+   |    Severity:    <c critical>  <h high>  <m medium>  <l low>  <i info>
+   |    Confidence:  <h high>  <m medium>  <l low>
+   |    Status:
+   |      open:         <n>
+   |      triaged:      <n>
+   |      in-progress:  <n>
+   |      fixed:        <n>  (awaiting re-verifier)
+   |      verified:     <n>  OK
+   |      needs-human:  <n>  !
+   |      wontfix:      <n>
+   |      deferred:     <n>
+   |      unverified:   <n>
+   |
+   |  Triage: <n> fix-units
+   |    Auto-fix eligible: <a>
+   |    Human review:      <b>
+   |    Complete:          <c>
+   |    Deferred:          <d>
+   |
+   |  Next: <recommended command>
+   |
+   +-------------------------------------------------------
    ```
 
    If any `needs-human` findings exist, list them explicitly below the box with their dissent notes. These are the items blocked on the user's judgment and should not get buried.
@@ -93,5 +93,5 @@ Read-only snapshot. Dispatch `@audit-orchestrator` but instruct it to dispatch *
 
 - This command never modifies state. `allowed-tools` excludes `Edit`, `Write`, `Bash`.
 - This command never dispatches specialist agents. The orchestrator reads state directly.
-- If state files are malformed (invalid JSON, missing required fields), report the specific file and field — do not silently skip. Corrupt state is itself a status worth surfacing.
-- If finding counts across `coverage.json`, `findings/`, and `triage.json` disagree, report the discrepancy. Do not pick a winner — let the user investigate.
+- If state files are malformed (invalid JSON, missing required fields), report the specific file and field -- do not silently skip. Corrupt state is itself a status worth surfacing.
+- If finding counts across `coverage.json`, `findings/`, and `triage.json` disagree, report the discrepancy. Do not pick a winner -- let the user investigate.

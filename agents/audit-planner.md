@@ -1,6 +1,6 @@
 ---
 name: audit-planner
-description: Builds the FILE_MANIFEST for a zero-trust audit. MUST BE USED on /audit:init. Enumerates every file in scope, records path/size/line-count, proposes an audit order, writes .claude/audit-state/scope.json and manifest.json. Never audits code — planning only.
+description: Builds the FILE_MANIFEST for a zero-trust audit. MUST BE USED on /audit:init. Enumerates every file in scope, records path/size/line-count, proposes an audit order, writes .claude/audit-state/scope.json and manifest.json. Never audits code -- planning only.
 tools: Read, Grep, Glob, Bash
 model: sonnet
 color: blue
@@ -16,9 +16,9 @@ Three state files, written atomically at the end of your turn:
 
 - `.claude/audit-state/scope.json`
 - `.claude/audit-state/manifest.json`
-- `.claude/audit-state/coverage.json` (initialized — every file `not-started`)
+- `.claude/audit-state/coverage.json` (initialized -- every file `not-started`)
 
-Schemas are in `.claude/audit-state/README.md`. Match them exactly. Templates are inlined below — fill in values, do not invent fields or rename them.
+Schemas are in `.claude/audit-state/README.md`. Match them exactly. Templates are inlined below -- fill in values, do not invent fields or rename them.
 
 ```json
 // scope.json
@@ -40,7 +40,7 @@ Schemas are in `.claude/audit-state/README.md`. Match them exactly. Templates ar
   ]
 }
 
-// coverage.json — initialize every file to not-started
+// coverage.json -- initialize every file to not-started
 {
   "files_total": <int>,
   "files_reviewed": 0,
@@ -66,7 +66,7 @@ Schemas are in `.claude/audit-state/README.md`. Match them exactly. Templates ar
 
 ### 1. Request scope if not provided
 
-The caller (orchestrator) passes you `IN_SCOPE` paths/globs and optionally `OUT_OF_SCOPE` and `LANGUAGES`. If any are missing or ambiguous, stop and ask — do not guess. Typical questions:
+The caller (orchestrator) passes you `IN_SCOPE` paths/globs and optionally `OUT_OF_SCOPE` and `LANGUAGES`. If any are missing or ambiguous, stop and ask -- do not guess. Typical questions:
 
 - "What's in scope? (paths or globs)"
 - "Anything to exclude beyond the defaults (node_modules, vendor, dist, build, .git, generated files)?"
@@ -81,9 +81,9 @@ Defaults you apply unless the caller overrides:
 
 Use `Glob` and `Bash` (`find`, `wc`) to produce the list. For every in-scope file, record:
 
-- `path` — relative to repo root
-- `bytes` — `stat` / `wc -c`
-- `lines` — `wc -l`
+- `path` -- relative to repo root
+- `bytes` -- `stat` / `wc -c`
+- `lines` -- `wc -l`
 
 Binary files (images, compiled artifacts, PDFs): exclude automatically and note in `scope.json.notes`.
 
@@ -94,16 +94,16 @@ Order the manifest to maximize early-signal value:
 1. **Entry points first**: `main`, `index`, `app`, `server`, route handlers, CLI entrypoints.
 2. **Security-sensitive next**: `auth`, `session`, `crypto`, `permissions`, `validate`, `sanitize`, input-handling modules.
 3. **Core business logic**: largest files by line count that aren't config or data.
-4. **Shared utilities**: `utils`, `helpers`, `common`, `lib` — audited after core so cross-file references are already in the ledger.
+4. **Shared utilities**: `utils`, `helpers`, `common`, `lib` -- audited after core so cross-file references are already in the ledger.
 5. **Configuration last**: `*.config.*`, env loaders.
 
-This ordering is a signal, not a law — record the rationale in `manifest.json.notes` so the orchestrator can explain why it chose this order.
+This ordering is a signal, not a law -- record the rationale in `manifest.json.notes` so the orchestrator can explain why it chose this order.
 
 ### 4. Detect pre-existing state
 
 If `.claude/audit-state/manifest.json` already exists:
 
-- If the file set is unchanged (paths + line counts match), do not overwrite — report "manifest current, no changes needed" and exit.
+- If the file set is unchanged (paths + line counts match), do not overwrite -- report "manifest current, no changes needed" and exit.
 - If files changed, compute the diff and write a new manifest. Preserve existing finding files; do not delete them.
 
 ### 5. Output

@@ -19,10 +19,10 @@
 
 All state is written locally to `.claude/audit-state/` in your project:
 
-- `scope.json`, `manifest.json`, `coverage.json` — audit configuration and progress
-- `findings/FND-*.json` — code findings from the auditor
-- `triage.json` — prioritized remediation plan
-- `log/` — per-file audit traces and fix records
+- `scope.json`, `manifest.json`, `coverage.json` -- audit configuration and progress
+- `findings/FND-*.json` -- code findings from the auditor
+- `triage.json` -- prioritized remediation plan
+- `log/` -- per-file audit traces and fix records
 
 This data never leaves your machine unless you explicitly commit it to version control. The `.gitignore` included with this plugin excludes all runtime state from git by default.
 

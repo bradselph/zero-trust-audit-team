@@ -22,7 +22,7 @@ Execute the chunked audit. Dispatch `@audit-orchestrator`.
 
 3. **Dispatch the auditor.** Pass the target file and resume line (if any):
 
-   > `@code-auditor` — audit file `<path>`. Resume at line `<n>` if continuing. Prior findings directory: `.claude/audit-state/findings/`. Manifest declared lines: `<m>`.
+   > `@code-auditor` -- audit file `<path>`. Resume at line `<n>` if continuing. Prior findings directory: `.claude/audit-state/findings/`. Manifest declared lines: `<m>`.
 
 4. **On auditor return:**
    - Verify the auditor output ends with a `STATUS: COMPLETE` or `STATUS: PARTIAL` marker.
